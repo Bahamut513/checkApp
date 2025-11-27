@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- 周数选择器 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="#f5f5f5">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择周数:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp" />
+
+        <Spinner
+            android:id="@+id/spinner_week"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/white"
+            android:padding="8dp" />
+
+        <Button
+            android:id="@+id/btn_reselect_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重新选择"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            android:paddingHorizontal="12dp" />
+
+        <TextView
+            android:id="@+id/tv_current_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="第1周"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:padding="8dp"
+            android:background="@android:color/white" />
+
+    </LinearLayout>
+
+    <!-- 课程表表格 -->
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
+
+        <TableLayout
+            android:id="@+id/table_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:shrinkColumns="*" />
+
+    </ScrollView>
+
+    <!-- 底部导航按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="#f5f5f5">
+
+        <Button
+            android:id="@+id/btn_prev_week"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="← 上一周"
+            android:textSize="14sp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/button_state_selector"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btn_next_week"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="下一周 →"
+            android:textSize="14sp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/button_state_selector"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+</LinearLayout>

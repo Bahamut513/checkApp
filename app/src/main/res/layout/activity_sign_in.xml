@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="课堂签到"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/tv_current_course"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="正在查找当前课程..."
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="#e8f5e8"
+        android:layout_marginBottom="32dp" />
+
+    <Button
+        android:id="@+id/btn_start_sign"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="启动微信小程序签到"
+        android:textSize="16sp"
+        android:enabled="false"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="使用说明：\n1. 点击按钮启动微信小程序\n2. 在小程序中完成签到操作\n3. 返回应用查看签到结果\n\n如果自动跳转失败，请手动：\n1. 打开微信\n2. 搜索『西南民大课堂考勤系统』\n3. 进入小程序完成签到"
+        android:textSize="14sp"
+        android:padding="16dp"
+        android:background="#f5f5f5"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
