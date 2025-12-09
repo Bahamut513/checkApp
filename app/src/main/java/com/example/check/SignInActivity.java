@@ -3,219 +3,234 @@ package com.example.check;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
-
 public class SignInActivity extends AppCompatActivity {
 
+    // 视图组件
+    private TextView tvStatus;
     private TextView tvCurrentCourse;
-    private Button btnStartSign;
+    private Button btnWechatMiniProgram;
+    private Button btnTestMiniProgram;
+    private Button btnOpenWechat;
+    private Button btnOpenChaoxing;
 
-    // 小程序原始ID
-    private static final String MINI_PROGRAM_ORIGINAL_ID = "gh_d2d41b77389b";
+    // 常量定义
+    private static final String WECHAT_PACKAGE = "com.tencent.mm";
+    private static final String CHAOXING_PACKAGE = "com.chaoxing.mobile";
+    private static final String TARGET_MINI_PROGRAM = "gh_d2d41b77389b"; // 微信考勤小程序
+    private static final String TEST_MINI_PROGRAM = "gh_d43f693ca31f";   // 微信测试小程序
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        tvCurrentCourse = findViewById(R.id.tv_current_course);
-        btnStartSign = findViewById(R.id.btn_start_sign);
+        // 初始化视图
+        initViews();
 
+        // 初始化微信API
+        WeChatManager.registerApp(this);
+
+        // 设置点击监听
+        setClickListeners();
+
+        // 模拟课程查询
         findCurrentCourse();
-        btnStartSign.setOnClickListener(v -> startWechatMiniProgram());
+
+        // 更新状态
+        updateStatus("应用已就绪");
     }
 
-    private void findCurrentCourse() {
-        CourseManager.getInstance(this).getCurrentCourse(new CourseManager.DatabaseOperationCallback() {
-            @Override
-            public void onOperationCompleted(boolean success) {}
+    private void initViews() {
+        tvStatus = findViewById(R.id.tv_status);
+        tvCurrentCourse = findViewById(R.id.tv_current_course);
+        btnWechatMiniProgram = findViewById(R.id.btn_wechat_mini_program);
+        btnTestMiniProgram = findViewById(R.id.btn_test_mini_program);
+        btnOpenWechat = findViewById(R.id.btn_open_wechat);
+        btnOpenChaoxing = findViewById(R.id.btn_open_chaoxing);
+    }
 
+    private void setClickListeners() {
+        // 1. 跳转到微信考勤小程序
+        btnWechatMiniProgram.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCoursesLoaded(List<Course> courses) {
-                runOnUiThread(() -> {
-                    if (!courses.isEmpty()) {
-                        Course currentCourse = courses.get(0);
-                        tvCurrentCourse.setText("当前课程: " + currentCourse.courseName +
-                                "\n地点: " + currentCourse.location +
-                                "\n时间: " + currentCourse.time);
-                        btnStartSign.setEnabled(true);
-                    } else {
-                        tvCurrentCourse.setText("当前时间段没有课程");
-                        btnStartSign.setEnabled(false);
-                    }
-                });
+            public void onClick(View v) {
+                launchToWeChatMiniProgram(TARGET_MINI_PROGRAM, "考勤小程序");
+            }
+        });
+
+        // 2. 测试小程序演示
+        btnTestMiniProgram.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchToWeChatMiniProgram(TEST_MINI_PROGRAM, "测试小程序");
+            }
+        });
+
+        // 3. 打开微信APP
+        btnOpenWechat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openWeChatApp();
+            }
+        });
+
+        // 4. 打开学习通APP
+        btnOpenChaoxing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openChaoxingApp();
             }
         });
     }
 
-    private void startWechatMiniProgram() {
-        Log.d("WechatMiniProgram", "开始启动微信小程序...");
-
-        // 检查微信是否安装
-        if (!isWechatInstalled()) {
-            Toast.makeText(this, "请先安装微信", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // 方法1: 使用标准URL Scheme跳转
-        if (tryStandardJump()) {
-            return;
-        }
-
-        // 方法2: 直接启动微信
-        launchWechatDirectly();
+    private void findCurrentCourse() {
+        // 模拟延迟后找到课程
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String courseName = "移动应用开发 (周一 10:00-11:40)";
+                        String location = "综合楼B座305教室";
+                        tvCurrentCourse.setText("📚 " + courseName + "\n📍 " + location);
+                        updateStatus("找到课程，可以开始签到");
+                    }
+                });
+            }
+        }, 1000);
     }
 
     /**
-     * 检查微信是否安装
+     * 跳转到微信小程序
+     * @param programId 小程序ID
+     * @param programName 小程序名称
      */
-    private boolean isWechatInstalled() {
+    private void launchToWeChatMiniProgram(String programId, String programName) {
+        updateStatus("正在跳转到" + programName + "...");
+
+        // 检查微信是否安装
+        if (!isAppInstalled(WECHAT_PACKAGE)) {
+            Toast.makeText(this, "请先安装微信客户端", Toast.LENGTH_LONG).show();
+            updateStatus("微信未安装");
+            return;
+        }
+
+        // 执行跳转
+        boolean success = WeChatManager.launchMiniProgram(this, programId);
+
+        if (success) {
+            Toast.makeText(this, "正在打开" + programName, Toast.LENGTH_SHORT).show();
+            updateStatus("已发送跳转请求");
+        } else {
+            Toast.makeText(this, "跳转失败，请重试", Toast.LENGTH_SHORT).show();
+            updateStatus("跳转失败");
+
+            // 备选方案：直接打开微信
+            openWeChatApp();
+        }
+    }
+
+    /**
+     * 打开学习通APP
+     */
+    private void openChaoxingApp() {
+        updateStatus("正在打开学习通...");
+
+        if (isAppInstalled(CHAOXING_PACKAGE)) {
+            try {
+                Intent intent = getPackageManager().getLaunchIntentForPackage(CHAOXING_PACKAGE);
+                if (intent != null) {
+                    startActivity(intent);
+                    updateStatus("已打开学习通");
+                } else {
+                    openChaoxingMarket();
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "打开失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                updateStatus("打开失败");
+                openChaoxingMarket();
+            }
+        } else {
+            Toast.makeText(this, "未安装学习通，正在跳转到下载页面", Toast.LENGTH_LONG).show();
+            openChaoxingMarket();
+        }
+    }
+
+    /**
+     * 打开微信APP
+     */
+    private void openWeChatApp() {
+        updateStatus("正在打开微信...");
+
+        if (!isAppInstalled(WECHAT_PACKAGE)) {
+            Toast.makeText(this, "请先安装微信客户端", Toast.LENGTH_LONG).show();
+            updateStatus("微信未安装");
+            return;
+        }
+
         try {
-            Intent intent = getPackageManager().getLaunchIntentForPackage("com.tencent.mm");
-            return intent != null;
+            Intent intent = getPackageManager().getLaunchIntentForPackage(WECHAT_PACKAGE);
+            if (intent != null) {
+                startActivity(intent);
+                updateStatus("已打开微信");
+            } else {
+                Toast.makeText(this, "无法打开微信", Toast.LENGTH_SHORT).show();
+                updateStatus("打开失败");
+            }
         } catch (Exception e) {
+            Toast.makeText(this, "打开微信失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            updateStatus("打开失败");
+        }
+    }
+
+    /**
+     * 打开学习通应用市场页面
+     */
+    private void openChaoxingMarket() {
+        try {
+            // 尝试打开应用市场
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW);
+            marketIntent.setData(Uri.parse("market://details?id=" + CHAOXING_PACKAGE));
+            startActivity(marketIntent);
+        } catch (Exception e) {
+            // 备用：打开网页版
+            Intent webIntent = new Intent(Intent.ACTION_VIEW);
+            webIntent.setData(Uri.parse("https://app.mi.com/details?id=" + CHAOXING_PACKAGE));
+            startActivity(webIntent);
+        }
+    }
+
+    // ==================== 工具方法 ====================
+
+    /**
+     * 检查应用是否安装
+     */
+    private boolean isAppInstalled(String packageName) {
+        try {
+            getPackageManager().getPackageInfo(packageName, 0);
+            return true;
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
             return false;
         }
     }
 
     /**
-     * 方法1: 使用标准URL Scheme跳转
+     * 更新状态显示
      */
-    private boolean tryStandardJump() {
-        try {
-            Log.d("WechatMiniProgram", "尝试标准URL Scheme跳转...");
-
-            // 扩展的跳转格式列表
-            String[] urlFormats = {
-                    // 格式1: 使用username参数（微信官方推荐）
-                    "weixin://dl/business/?username=gh_d2d41b77389b",
-                    "weixin://dl/business/?t=" + System.currentTimeMillis() + "&username=gh_d2d41b77389b",
-
-                    // 格式2: 使用appid参数
-                    "weixin://dl/business/?appid=gh_d2d41b77389b",
-                    "weixin://dl/business/?t=" + System.currentTimeMillis() + "&appid=gh_d2d41b77389b",
-
-                    // 格式3: 最简格式
-                    "weixin://dl/business/gh_d2d41b77389b",
-
-                    // 格式4: 使用startapp
-                    "weixin://dl/startapp?userName=gh_d2d41b77389b",
-                    "weixin://dl/startapp?userName=gh_d2d41b77389b&path=pages/index/index",
-
-                    // 格式5: 使用jumpWxa
-                    "weixin://jumpWxa/?userName=gh_d2d41b77389b",
-
-                    // 格式6: 带路径参数
-                    "weixin://dl/business/?username=gh_d2d41b77389b&path=pages/index/index",
-                    "weixin://dl/business/?appid=gh_d2d41b77389b&path=pages/index/index",
-                    "weixin://dl/business/?username=gh_d2d41b77389b&path=pages/home/home",
-
-                    // 格式7: 其他可能的参数名
-                    "weixin://dl/business/?miniProgramId=gh_d2d41b77389b",
-                    "weixin://dl/business/?target=gh_d2d41b77389b",
-                    "weixin://dl/business/?id=gh_d2d41b77389b"
-            };
-
-            for (int i = 0; i < urlFormats.length; i++) {
-                String url = urlFormats[i];
-                Log.d("WechatMiniProgram", "测试URL [" + (i+1) + "/" + urlFormats.length + "]: " + url);
-
-                if (trySingleUrl(url)) {
-                    // 记录成功的URL格式
-                    Log.d("WechatMiniProgram", "🎉 找到可用的URL格式: " + url);
-                    return true;
-                }
-
-                // 短暂延迟
-                try { Thread.sleep(300); } catch (InterruptedException e) { break; }
-            }
-
-            Log.d("WechatMiniProgram", "所有URL格式都失败了");
-            showFormatTestDialog();
-
-        } catch (Exception e) {
-            Log.e("WechatMiniProgram", "标准跳转失败", e);
-        }
-        return false;
-    }
-
-    private boolean trySingleUrl(String url) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            intent.setPackage("com.tencent.mm"); // 指定微信包名
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivity(intent);
-                Log.d("WechatMiniProgram", "✅ URL跳转成功: " + url);
-                Toast.makeText(this, "正在跳转到小程序...", Toast.LENGTH_SHORT).show();
-                return true;
-            } else {
-                Log.d("WechatMiniProgram", "❌ 没有应用可以处理: " + url);
-            }
-        } catch (Exception e) {
-            Log.e("WechatMiniProgram", "❌ URL跳转失败: " + url, e);
-        }
-        return false;
-    }
-
-    /**
-     * 显示格式测试对话框
-     */
-    private void showFormatTestDialog() {
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("跳转测试")
-                .setMessage("自动跳转失败，可能的原因：\n\n" +
-                        "1. 小程序ID不正确\n" +
-                        "2. 小程序未发布或不可用\n" +
-                        "3. 需要特定的跳转参数\n\n" +
-                        "是否尝试手动获取正确的小程序信息？")
-                .setPositiveButton("手动操作", (dialog, which) -> {
-                    launchWechatDirectly();
-                })
-                .setNegativeButton("取消", null)
-                .show();
-    }
-
-    /**
-     * 方法2: 直接启动微信
-     */
-    private void launchWechatDirectly() {
-        try {
-            Intent intent = getPackageManager().getLaunchIntentForPackage("com.tencent.mm");
-            if (intent != null) {
-                startActivity(intent);
-                showWechatGuide();
-            } else {
-                Toast.makeText(this, "请先安装微信", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "启动微信失败", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void showWechatGuide() {
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("小程序签到指引")
-                .setMessage("微信已启动，请按以下步骤操作：\n\n" +
-                        "1. 点击右上角搜索图标\n" +
-                        "2. 搜索：西南民大课堂考勤系统\n" +
-                        "3. 点击第一个搜索结果\n" +
-                        "4. 在小程序中完成签到\n\n" +
-                        "完成后返回此应用")
-                .setPositiveButton("明白了", null)
-                .show();
+    private void updateStatus(String message) {
+        tvStatus.setText("状态: " + message);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("SignIn", "用户返回应用");
+        updateStatus("应用已恢复");
     }
 }

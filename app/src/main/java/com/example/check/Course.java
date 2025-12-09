@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import androidx.room.Ignore;
 
 @Entity(tableName = "courses")
 public class Course {
@@ -24,6 +25,15 @@ public class Course {
     public int endWeek;       // 结束周
     public String weekType;   // 周类型 (单周/双周/全部)
 
+    // 新增字段用于网络同步
+    public Long serverId; // 服务器端的课程ID
+    public Long userId;   // 用户ID
+
+    // 无参构造函数 - Gson需要
+    public Course() {
+        // 默认构造函数
+    }
+    @Ignore
     public Course(String courseName, String teacher, String location, String time) {
         this.courseName = courseName;
         this.teacher = teacher;
@@ -36,6 +46,38 @@ public class Course {
         // 记录课程创建日志
         Log.d("Course", String.format("创建课程: %s - %s - %s - %s",
                 courseName, teacher, location, time));
+    }
+    @Ignore
+    public Course(String courseName, String teacher, String location, String time,
+                  int dayOfWeek, int startSection, int endSection,
+                  int startWeek, int endWeek, String weekType) {
+        this.courseName = courseName;
+        this.teacher = teacher;
+        this.location = location;
+        this.time = time;
+        this.dayOfWeek = dayOfWeek;
+        this.startSection = startSection;
+        this.endSection = endSection;
+        this.startWeek = startWeek;
+        this.endWeek = endWeek;
+        this.weekType = weekType;
+        parseTimeInfo(time); // 确保时间信息正确解析
+    }
+
+    // 复制构造函数
+    public Course(Course other) {
+        this.courseName = other.courseName;
+        this.teacher = other.teacher;
+        this.location = other.location;
+        this.time = other.time;
+        this.dayOfWeek = other.dayOfWeek;
+        this.startSection = other.startSection;
+        this.endSection = other.endSection;
+        this.startWeek = other.startWeek;
+        this.endWeek = other.endWeek;
+        this.weekType = other.weekType;
+        this.serverId = other.serverId;
+        this.userId = other.userId;
     }
 
     // 解析时间信息

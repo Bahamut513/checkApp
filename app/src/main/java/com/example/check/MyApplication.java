@@ -1,7 +1,7 @@
 package com.example.check;
 
 import android.app.Application;
-import com.example.check.utils.WeChatManager;
+import com.example.check.WeChatManager; // 确认导入路径正确
 
 public class MyApplication extends Application {
 

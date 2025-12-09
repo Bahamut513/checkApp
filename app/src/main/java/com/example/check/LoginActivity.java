@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
+import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,6 +29,15 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 添加登录检查
+        if (!TokenManager.isLoggedIn(this)) {
+            Intent intent = new Intent(this, AuthActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
         webView = findViewById(R.id.webView);
@@ -41,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         // 加载统一身份认证登录页面
         webView.loadUrl("https://authserver.swun.edu.cn/authserver/login?service=http%3A%2F%2Fehall.swun.edu.cn%2Flogin");
     }
+
 
     private void setupWebView() {
         webView.getSettings().setJavaScriptEnabled(true);
@@ -146,11 +157,10 @@ public class LoginActivity extends AppCompatActivity {
     private void parseCourseTable(String html) {
         new Thread(() -> {
             try {
-                // 使用健壮的解析器
                 CourseParser.ParseResult parseResult = CourseParser.parseCourseTable(html, "用户课表");
 
                 if (parseResult.isSuccess() && !parseResult.getCourses().isEmpty()) {
-                    // 保存到数据库
+                    // 保存到本地数据库
                     CourseManager.getInstance(LoginActivity.this).clearCourses();
                     CourseManager.getInstance(LoginActivity.this).addAllCourses(parseResult.getCourses());
 
@@ -160,6 +170,11 @@ public class LoginActivity extends AppCompatActivity {
 
                     runOnUiThread(() -> {
                         showParseResult(parseResult.getCourses().size(), savedCourses.size(), parseResult.getMessage());
+
+                        // 新增：同步到服务器
+                        if (TokenManager.isLoggedIn(LoginActivity.this)) {
+                            syncCoursesToServer(savedCourses);
+                        }
                     });
                 } else {
                     runOnUiThread(() -> {
@@ -176,6 +191,27 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    // 新增：同步课程到服务器
+    private void syncCoursesToServer(List<Course> courses) {
+        CourseManager.getInstance(this).syncCoursesToServer(this, new CourseManager.DatabaseOperationCallback() {
+            @Override
+            public void onOperationCompleted(boolean success) {
+                runOnUiThread(() -> {
+                    if (success) {
+                        Toast.makeText(LoginActivity.this, "课程已同步到服务器", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "课程同步失败，请检查网络", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onCoursesLoaded(List<Course> courses) {
+                // 不需要实现
+            }
+        });
     }
 
     private void showParseResult(int parsedCount, int savedCount, String message) {
@@ -201,6 +237,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (courses.size() > 5) {
                             result.append("... 等").append(courses.size()).append("门课程");
                         }
+
 
                         // 显示详细结果
                         new AlertDialog.Builder(LoginActivity.this)

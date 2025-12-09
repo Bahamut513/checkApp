@@ -6,57 +6,228 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
+    <!-- 标题 -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="一键签到系统"
-        android:textSize="24sp"
+        android:text="课堂管理助手"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:textColor="@color/primary_color"
         android:gravity="center"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="32dp"
+        android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/btn_login"
+    <!-- 功能按钮区域 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="登录学校系统"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.Material3.Button" />
+        android:orientation="vertical"
+        android:layout_marginBottom="24dp">
 
-    <Button
-        android:id="@+id/btn_course_management"
+        <!-- 登录学校系统 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/primary_color">
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="登录学校系统"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 课程列表 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp">
+
+            <Button
+                android:id="@+id/btn_course_management"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="课程列表"
+                android:textSize="16sp"
+                android:textColor="@color/primary_color"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 课程表 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp">
+
+            <Button
+                android:id="@+id/btn_course_table"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="课程表"
+                android:textSize="16sp"
+                android:textColor="@color/primary_color"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null" />
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 课堂签到 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp">
+
+            <Button
+                android:id="@+id/btn_auto_sign"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="课堂签到跳转"
+                android:textSize="16sp"
+                android:textColor="@color/primary_color"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null" />
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <!-- 新增功能按钮的水平布局 -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="课程列表"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.Material3.Button" />
+        android:text="更多功能"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp" />
 
-    <!-- 新增课程表按钮 -->
-    <Button
-        android:id="@+id/btn_course_table"
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_status"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="课程表"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.Material3.Button" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
 
-    <Button
-        android:id="@+id/btn_auto_sign"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="课堂签到"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.Material3.Button" />
+        <!-- 课堂记忆 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="140dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@color/card_memory_color">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_memory"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/btn_class_memory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="课堂记忆"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 上传文件 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="140dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@color/card_upload_color">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_upload"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/btn_upload_file"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="上传文件"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+
+
+    <!-- 状态显示 -->
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="请先登录学校系统并导入课表"
+        android:text="首次登录后，请先登录学校系统并导入课表"
         android:textSize="14sp"
+        android:textColor="@color/gray"
         android:gravity="center"
-        android:layout_marginTop="32dp" />
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:background="@color/light_gray" />
 
 </LinearLayout>
